@@ -175,3 +175,128 @@ String json objectMapper.writeValueAsString(person);
   - 인기있는 외부라이브러리, 프레임워크
   - 우리의 어플리케이션
 - 주의할점이 있는 자바 리플렉션의 문제
+
+### 리플랙션 엔트리 포인트
+
+- Class<?>는 우리가 작성한 코드를 리플렉트하는 진입점임
+- Class<?> 타입 객체엔 정보가 담겨있음
+  - 객체의 런타임 타입
+  - 우리의 어플리케이션 속 클래스
+- 정보가 담고있는 것
+  - 어떤 메소드와 필드를 가지고 있는지
+  - 어떤 클래스를 확장하는지
+  - 어떤 인터페이스를 구현하는지
+
+### Class<?> 객체를 얻는 3가지 방법
+
+####1. Object.getClass()
+```java
+String stringObject = "some-string";
+
+Car car = new Car();
+
+Map<String, Integer> map = new Hashmap<>;
+
+Class<String> stringClass = stringObject.getClass();
+
+Class<Car> carClass = car.getClass();
+
+Class<?> mapClass = map.getClass(); // return HashMap class 맵 인터페이스를 리턴하지 않음
+```
+
+```java
+boolean condition = true;
+
+int value = 55;
+
+double price = 1.5;
+
+Class booleanClass = condition.getClass(); // compliation error
+
+Class intClass = value.getClass(); // compliation error
+
+Class doublePrice = price.getClass(); // compliation error
+```
+
+####2. ".class" suffix to a type name
+```java
+Class<String> stringClass = String.class
+...
+
+Class booleanType = boolean.class;
+```
+
+####3. Class.forName(...) 
+```java
+Class<?> stringType = Class.forName("java.lang.String"); 
+
+Class<?> carType = Class.forName("vehicles.Car");
+
+Class<?> engineType = Class.forName("vehicles.Car$Engine") // 이너 클래스 접근
+```
+
+```java
+package vehicles
+class Car {
+    ...
+    static class Engine {
+        ...
+    }
+}
+```
+
+```java
+boolean condition = true;
+
+int value = 55;
+
+double price = 1.5;
+
+Class booleanClass = Class.forName("boolean"); // Runtime Error...
+...
+```
+
+### Notes on Class.forName()
+
+- 클래스 이름을 잘못 입력할 가능성이 크고 런타임 에러인 ClassNotFoundException를 던짐 
+- Class.forName의 인수로 전달한 클래스가 존재하지 않을 경우
+- Class.forName(..)의 메소드가 Class<?> 객체를 얻기엔 가장 덜 안전함
+- Class<?> 객체를 얻기위해 Class.forName()메소드를 사용해야하는 유즈케이스가 있음
+```xml
+<!--사용자 정의 구성 파일에서 전달될 때 이 메서드( Class.forName() )를 사용함-->
+<appender name="fileAppender"
+  class="org.apche.log4j.RollingFileAppender">
+  <layout class="org.apache.log4j.PatternLayout" />
+</appender>
+
+<!--
+Class<?> vehicle = Class.forName(value)
+-->
+<bean id="vehicle" class="vehicles.Motocycle">
+  <property name="numberOfWheels" value="2" />  
+</bean>
+```
+![사진]
+### Generics - Java Wildcards
+![제네릭]
+
+```java
+Class<?> carClass = Class.forName("vehicles.Car")
+
+Map<String, Integer> genericMap = new HashMap<>();
+
+Class<?> hashMapClass = genegicMap.getClass();
+```
+
+```java
+// Restricts to only type that extend Collection
+public List<String> findAllMethods(Class<? extends Collection> clazz) {
+    
+}
+```
+
+### Summary
+- Class<?> - 리플렉션을 사용하는 진입점
+- 클래스 오브젝트를 얻을 수 있는 세 가지 방법 
+  - getClass(), dot operation ".class", Class.forName()
+- Java Wildcards
